@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Integral de Convenios - Prefectura del Guayas</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+<div class="app">
+    <aside class="sidebar">
+        <div class="logo"><div class="mark">🌾</div><h2>PREFECTURA</h2><p>Guayas Se Mueve</p></div>
+        <nav class="nav">
+            <div class="nav-item active" data-view="powerbi"><span class="ico">📈</span><span class="lbl">Reporte Power BI</span></div>
+            <div class="nav-item" data-view="dashboard"><span class="ico">📊</span><span class="lbl">Dashboard</span></div>
+            <div class="nav-item" data-view="timeline"><span class="ico">📅</span><span class="lbl">Línea de Tiempo</span></div>
+            <div class="nav-item" data-view="table"><span class="ico">📋</span><span class="lbl">Tabla de Convenios</span></div>
+            <div class="nav-item" data-view="charts"><span class="ico">📈</span><span class="lbl">Gráficos</span></div>
+            <div class="nav-item" data-view="calendar"><span class="ico">🗓️</span><span class="lbl">Calendario</span></div>
+            <div class="nav-item" data-view="map"><span class="ico">🗺️</span><span class="lbl">Mapa</span></div>
+        </nav>
+    </aside>
+
+    <div class="main">
+        <header class="topbar">
+            <h1 id="viewTitle">📈 Reporte Power BI</h1>
+            <div class="stats">
+                <div class="stat"><b id="stTotal">0</b><span>Total</span></div>
+                <div class="stat"><b id="stExec">0</b><span>Ejecución</span></div>
+                <div class="stat"><b id="stVig">0</b><span>Vigentes</span></div>
+                <div class="stat"><b id="stTram">0</b><span>En trámite</span></div>
+                <div class="stat"><b id="stFin">0</b><span>Finalizados</span></div>
+            </div>
+        </header>
+
+        <div class="content">
+            <!-- PORTADA: POWER BI -->
+            <section id="powerbi" class="view active">
+                <div class="card pbi-card">
+                    <div class="pbi-head">
+                        <h2>📈 MonConP — Reporte oficial en Power BI</h2>
+                        <div class="btns">
+                            <button class="btn btn-filter" id="pbiReload">↺ Recargar</button>
+                            <button class="btn btn-solid" id="pbiFullscreen">⛶ Pantalla completa</button>
+                        </div>
+                    </div>
+                    <div class="pbi-wrap">
+                        <iframe id="pbiFrame" title="MonConP"
+                            src="https://app.powerbi.com/reportEmbed?reportId=0b31a829-ed17-446d-a4b6-8a4f6b0b323d&autoAuth=true&ctid=5417ffd9-1940-432a-a35f-63e867763795"
+                            frameborder="0" allowfullscreen="true"></iframe>
+                    </div>
+                    <p class="pbi-note">ℹ️ Este reporte se carga en vivo desde Power BI (autoAuth). Si aparece una pantalla de inicio de sesión, ingresa con la cuenta institucional autorizada de la organización. Los datos provienen de la Matriz de Convenios de Cooperación Nacional e Internacional.</p>
+                </div>
+            </section>
+
+            <!-- DASHBOARD -->
+            <section id="dashboard" class="view">
+                <div class="kpis">
+                    <div class="kpi"><div class="ico">🤝</div><b id="kTotal">0</b><span>Convenios (1–20)</span></div>
+                    <div class="kpi" style="border-left-color:var(--primary-light)"><div class="ico">⚙️</div><b id="kExec">0</b><span>En ejecución</span></div>
+                    <div class="kpi" style="border-left-color:var(--success)"><div class="ico">✅</div><b id="kVig">0</b><span>Vigentes</span></div>
+                    <div class="kpi" style="border-left-color:var(--warning)"><div class="ico">📝</div><b id="kTram">0</b><span>En trámite</span></div>
+                </div>
+                <div class="grid-2">
+                    <div class="card"><h2>📊 Convenios por estado</h2><div class="chart-box"><canvas id="dashEstado"></canvas></div></div>
+                    <div class="card"><h2>🔔 Alertas y vencimientos</h2><div id="alertsBox"></div></div>
+                </div>
+            </section>
+
+            <!-- TIMELINE -->
+            <section id="timeline" class="view">
+                <div class="card">
+                    <h2>🎯 Línea de tiempo interactiva</h2>
+                    <div class="tl-controls">
+                        <div class="tl-row">
+                            <div class="ctrl"><label>📌 Desde</label><div class="slider-row"><input type="range" id="slStart" min="0" max="84" value="0"><div class="date-badge" id="bdStart">2023-01</div></div></div>
+                            <div class="ctrl"><label>📌 Hasta</label><div class="slider-row"><input type="range" id="slEnd" min="0" max="84" value="84"><div class="date-badge" id="bdEnd">2030-01</div></div></div>
+                        </div>
+                        <div class="ctrl"><label>🏷️ Filtrar por estado</label>
+                            <div class="btns">
+                                <button class="btn btn-filter active" data-f="all">Todos</button>
+                                <button class="btn btn-filter" data-f="exec">⚙️ En ejecución</button>
+                                <button class="btn btn-filter" data-f="vig">✅ Vigentes</button>
+                                <button class="btn btn-filter" data-f="tram">📝 En trámite</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tl-visual">
+                        <div class="tl-axis">
+                            <span class="yr">2023</span><span class="yr">2024</span><span class="yr">2025</span><span class="yr">2026</span>
+                            <span class="yr">2027</span><span class="yr">2028</span><span class="yr">2029</span><span class="yr">2030</span>
+                            <div class="line"></div>
+                        </div>
+                        <div class="tl-rows" id="tlRows"></div>
+                    </div>
+                    <p class="tl-note" id="tlNote"></p>
+                </div>
+                <div class="card">
+                    <h2>📊 Estado de los convenios</h2>
+                    <div class="stages">
+                        <div class="stage" style="border-left-color:var(--warning)"><div class="ico">📝</div><h4>En trámite</h4><p>Por suscribir o en revisión previa a la firma.</p><div class="count" style="background:var(--warning)" id="cgTram">0</div></div>
+                        <div class="stage"><div class="ico">⚙️</div><h4>En ejecución</h4><p>Implementación activa de las obligaciones.</p><div class="count" style="background:var(--primary)" id="cgExec">0</div></div>
+                        <div class="stage" style="border-left-color:var(--success)"><div class="ico">✅</div><h4>Vigente</h4><p>Periodo de vigencia activo del acuerdo.</p><div class="count" style="background:var(--success)" id="cgVig">0</div></div>
+                        <div class="stage" style="border-left-color:var(--gray-dark)"><div class="ico">🏁</div><h4>Finalizado</h4><p>Cumplimiento total y cierre del convenio.</p><div class="count" style="background:var(--gray-dark)" id="cgFin">0</div></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TABLE -->
+            <section id="table" class="view">
+                <div class="card">
+                    <h2>📋 Tabla de convenios (1–20)</h2>
+                    <div class="table-tools">
+                        <input type="text" id="tableSearch" class="input" placeholder="Buscar por institución, dirección o coordinación…">
+                        <select id="filterEstado" class="select">
+                            <option value="">Todos los estados</option>
+                            <option value="exec">En ejecución</option>
+                            <option value="vig">Vigente</option>
+                            <option value="tram">En trámite</option>
+                            <option value="fin">Finalizado</option>
+                        </select>
+                        <select id="filterOrigen" class="select">
+                            <option value="">Todos los orígenes</option>
+                            <option value="Nacional">Nacional</option>
+                            <option value="Internacional">Internacional</option>
+                        </select>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead><tr>
+                                <th>No.</th><th>Institución cooperante</th><th>Origen</th><th>Dirección</th>
+                                <th>Coordinación</th><th>Estado</th><th>Suscripción</th><th>Vigencia</th><th>Ejecución</th>
+                            </tr></thead>
+                            <tbody id="tableBody"></tbody>
+                        </table>
+                    </div>
+                    <p id="tableEmpty" style="display:none; text-align:center; color:var(--gray-dark); padding:2rem;">No hay convenios que coincidan con la búsqueda.</p>
+                </div>
+            </section>
+
+            <!-- CHARTS -->
+            <section id="charts" class="view">
+                <div class="chart-grid">
+                    <div class="card"><h2>📊 Por estado</h2><div class="chart-box"><canvas id="chEstado"></canvas></div></div>
+                    <div class="card"><h2>🌐 Por origen</h2><div class="chart-box"><canvas id="chOrigen"></canvas></div></div>
+                    <div class="card"><h2>🏛️ Por dirección</h2><div class="chart-box"><canvas id="chDir"></canvas></div></div>
+                    <div class="card"><h2>🗂️ Por coordinación</h2><div class="chart-box"><canvas id="chCoord"></canvas></div></div>
+                    <div class="card"><h2>📈 Rangos de ejecución</h2><div class="chart-box"><canvas id="chEjec"></canvas></div></div>
+                </div>
+            </section>
+
+            <!-- CALENDAR -->
+            <section id="calendar" class="view">
+                <div class="card">
+                    <div class="cal-head">
+                        <h3 id="calTitle">Mes</h3>
+                        <div class="cal-nav">
+                            <button class="btn btn-filter" id="calPrev">‹ Anterior</button>
+                            <button class="btn btn-solid" id="calToday">Hoy</button>
+                            <button class="btn btn-filter" id="calNext">Siguiente ›</button>
+                        </div>
+                    </div>
+                    <div class="cal-grid" id="calGrid"></div>
+                    <div class="cal-legend">
+                        <span><i class="dot" style="background:var(--success)"></i> Suscripción / inicio</span>
+                        <span><i class="dot" style="background:var(--danger)"></i> Fin de vigencia</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- MAP -->
+            <section id="map-view" class="view">
+                <div class="card">
+                    <h2>🗺️ Distribución geográfica</h2>
+                    <div id="map"></div>
+                    <div class="map-legend">
+                        <span><i class="dot" style="background:var(--primary)"></i> En ejecución</span>
+                        <span><i class="dot" style="background:var(--success)"></i> Vigente</span>
+                        <span><i class="dot" style="background:var(--warning)"></i> En trámite</span>
+                        <span><i class="dot" style="background:var(--gray-dark)"></i> Finalizado</span>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>
